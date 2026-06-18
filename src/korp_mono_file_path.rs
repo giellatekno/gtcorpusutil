@@ -20,6 +20,12 @@ impl KorpMonoFilePath {
         p.push(self.file.clone());
         p
     }
+
+    /// Read the file contents into a new [String]. Equivalent to
+    /// `std::fs::read_to_string(&self.to_path_buf())`.
+    pub fn read_to_string(&self) -> std::io::Result<String> {
+        std::fs::read_to_string(&self.to_path_buf())
+    }
 }
 
 impl From<AnalysedFilePath> for KorpMonoFilePath {
