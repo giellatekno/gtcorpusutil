@@ -29,6 +29,7 @@
 //!             <language xml:lang="sme"/>
 //!             <language xml:lang="nob"/>
 //!         </multilingual>
+//!         <orthography>something</orthography>
 //!         <origFileName>http://www.nav.no/Samisk/Familie</origFileName><metadata><uncomplete/></metadata><version>XSLtemplate $Revision: 31551 $; file-specific xsl  Revision; common.xsl  $Revision$; </version></header>
 //! <body>
 //! <p type="title">Bearaš</p>
@@ -92,6 +93,14 @@ impl<'a> ConvertedDocument<'a> {
 
     fn root(&'_ self) -> roxmltree::Node<'a, '_> {
         self.0.root_element()
+    }
+
+    /// Return the contents of the `header/orthography`, if that tag
+    /// is present.
+    pub fn orthography(&self) -> Option<&str> {
+        self.header_descendants()?
+            .find(tag_name_equals("orthography"))?
+            .text()
     }
 
     fn header_descendants(&self) -> Option<roxmltree::Descendants<'_, '_>> {
