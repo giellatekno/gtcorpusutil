@@ -110,7 +110,9 @@ pub fn strip<'a>(string: &'a str, substr: &str) -> Option<&'a str> {
     Some(string.strip_prefix(substr)?.strip_suffix(substr)?)
 }
 
-fn find_xml_files<P: AsRef<std::path::Path>>(path: P) -> impl Iterator<Item = walkdir::DirEntry> {
+/// Recursively iterate the directory given by `path`, and yield
+/// all .xml files as `walkdir::DirEntry`.
+pub fn find_xml_files<P: AsRef<std::path::Path>>(path: P) -> impl Iterator<Item = walkdir::DirEntry> {
     walkdir::WalkDir::new(path)
         .into_iter()
         .flat_map(move |maybe_entry| maybe_entry)
