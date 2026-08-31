@@ -10,6 +10,7 @@
 //!         <author>
 //!             <unknown/>
 //!         </author>
+//!         <year></year>
 //!         <translator>
 //!             <unknown/>
 //!         </translator>
@@ -71,18 +72,32 @@ impl<'a> ConvertedDocument<'a> {
         self.body().and_then(|node| node.text())
     }
 
-    /// Return the text contents of xpath `/header/title`
+    /// Return the text contents of xpath `/header/title`.
     pub fn title(&self) -> Option<&str> {
         self.header_descendants()?
             .find(tag_name_equals("title"))?
             .text()
     }
 
-    /// Return the attribute contents of xpath `/header/genre[@code]`
+    /// Return the attribute contents of xpath `/header/genre[@code]`.
     pub fn genre(&self) -> Option<&str> {
         self.header_descendants()?
             .find(tag_name_equals("genre"))?
             .attribute("code")
+    }
+
+    /// Return the text contents of xpath `/header/orthography`.
+    pub fn orthography(&self) -> Option<&str> {
+        self.header_descendants()?
+            .find(tag_name_equals("orthography"))?
+            .text()
+    }
+
+    /// Return the text contents of xpath `header/year`.
+    pub fn year(&self) -> Option<&str> {
+        self.header_descendants()?
+            .find(tag_name_equals("year"))?
+            .text()
     }
 
     ///// Return the author
@@ -93,14 +108,6 @@ impl<'a> ConvertedDocument<'a> {
 
     fn root(&'_ self) -> roxmltree::Node<'a, '_> {
         self.0.root_element()
-    }
-
-    /// Return the contents of the `header/orthography`, if that tag
-    /// is present.
-    pub fn orthography(&self) -> Option<&str> {
-        self.header_descendants()?
-            .find(tag_name_equals("orthography"))?
-            .text()
     }
 
     fn header_descendants(&self) -> Option<roxmltree::Descendants<'_, '_>> {
