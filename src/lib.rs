@@ -70,6 +70,7 @@
 mod analysed;
 mod analysed_document;
 mod analysed_file_path;
+mod category;
 mod converted;
 mod converted_document;
 mod converted_file_path;
@@ -89,6 +90,7 @@ use std::path::{Path, PathBuf};
 // public exports
 pub use crate::analysed::{Analysed};
 pub use crate::analysed_file_path::AnalysedFilePath;
+pub use crate::category::{Category, NotCategoryError};
 pub use crate::converted::Converted;
 pub use crate::converted_document::ConvertedDocument;
 pub use crate::converted_file_path::ConvertedFilePath;

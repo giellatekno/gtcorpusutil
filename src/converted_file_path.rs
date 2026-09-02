@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use crate::Converted;
 use crate::AnalysedFilePath;
+use crate::{Category, NotCategoryError};
 
 /// The path to a file in the converted module.
 pub struct ConvertedFilePath {
@@ -46,6 +47,18 @@ impl ConvertedFilePath {
         // SAFETY: mmap() - so UB if the file is changed underneath us, etc...
         let mmapped = unsafe { memmap2::Mmap::map(&file) }.map_err(Error::Mmap)?;
         Ok(String::from_utf8(mmapped.to_vec())?)
+    }
+
+    /// Get the category of this file.
+    pub fn category(&self) -> Result<Category, NotCategoryError> {
+        let c = self.file.components().next().expect("path is not empty");
+        let s = c.as_os_str().to_str().expect("all file paths are valid utf8");
+        Category::from_path_str(s)
+    }
+
+    /// Is this file part of the historic part of the corpora?
+    pub fn is_hist(&self) -> bool {
+        matches!(self.category(), Err(NotCategoryError::Hist))
     }
 
     // Return the same path, but specifically without a file selected,
