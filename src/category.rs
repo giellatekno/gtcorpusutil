@@ -22,6 +22,25 @@ pub enum Category {
     Wikipedia,
 }
 
+impl Category {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Category::Administration => "admin",
+            Category::Bible => "bible",
+            Category::Blogs => "blogs",
+            Category::Facta => "facta",
+            Category::Ficti => "ficti",
+            Category::Laws => "laws",
+            Category::Literature => "literature",
+            Category::News => "news",
+            Category::Reindriftsnytt => "reindriftsnytt",
+            Category::Science => "science",
+            Category::Speccorp => "speccorp",
+            Category::Wikipedia => "wikipedia",
+        }
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum NotCategoryError {
     #[error("unknown directory: {0}")]

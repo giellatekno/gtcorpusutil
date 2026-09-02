@@ -51,9 +51,18 @@ impl ConvertedFilePath {
 
     /// Get the category of this file.
     pub fn category(&self) -> Result<Category, NotCategoryError> {
-        let c = self.file.components().next().expect("path is not empty");
-        let s = c.as_os_str().to_str().expect("all file paths are valid utf8");
-        Category::from_path_str(s)
+        let mut components = self.file.components();
+        let c = components.next().expect("path is not empty");
+        let s = c.as_os_str().to_str().expect("file paths are valid utf-8");
+        match Category::from_path_str(s) {
+            Ok(category) => Ok(category),
+            Err(NotCategoryError::Hist) => {
+                let c = components.next().unwrap();
+                let s = c.as_os_str().to_str().expect("file paths are valid utf-8");
+                Category::from_path_str(s)
+            }
+            Err(other) => Err(other),
+        }
     }
 
     /// Is this file part of the historic part of the corpora?
