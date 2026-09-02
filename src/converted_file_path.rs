@@ -67,7 +67,10 @@ impl ConvertedFilePath {
 
     /// Is this file part of the historic part of the corpora?
     pub fn is_hist(&self) -> bool {
-        matches!(self.category(), Err(NotCategoryError::Hist))
+        let mut components = self.file.components();
+        let c = components.next().expect("path is not empty");
+        let s = c.as_os_str().to_str().expect("file paths are valid utf-8");
+        matches!(Category::from_path_str(s), Err(NotCategoryError::Hist))
     }
 
     // Return the same path, but specifically without a file selected,
