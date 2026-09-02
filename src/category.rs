@@ -7,6 +7,7 @@
 /// are  "hist", "inc", and "tmp".
 ///
 /// todo: what is "pma", "rmy-rka", "rmy-rlo"?
+#[derive(Debug, Clone, Copy)]
 pub enum Category {
     Administration,
     Bible,
