@@ -31,10 +31,10 @@ impl KorpMono {
     /// An iterator over all the xml files in this `korp_mono/` directory.
     pub fn files(&self) -> impl Iterator<Item = KorpMonoFilePath> {
         let p = self.to_path_buf();
-        crate::find_xml_files(self.to_path_buf()).filter_map(move |entry| {
+        crate::find_xml_files(self.to_path_buf()).map(move |entry| {
             let file = entry.path().strip_prefix(&p)
                 .expect("absolute path of entry is a subpath of input path");
-            Some(self.with_file(file))
+            self.with_file(file)
         })
     }
 }

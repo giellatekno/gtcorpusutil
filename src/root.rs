@@ -32,7 +32,7 @@ impl Root {
         WalkDir::new(&self.0)
             .max_depth(1)
             .into_iter()
-            .flat_map(|maybe_entry| maybe_entry)
+            .flatten()  // ignore errors
             .filter(|entry| entry.file_type().is_dir())
             .filter_map(|entry| Corpus::try_from(entry.into_path()).ok())
     }

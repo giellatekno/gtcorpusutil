@@ -121,36 +121,36 @@ impl<'a> ConvertedDocument<'a> {
 
 // helper to use in with `Node::descendants().find()` to find the node whose
 // tag name is `tag_name`
-fn tag_name_equals(tag_name: &str) -> impl FnMut(&roxmltree::Node<'_, '_>) -> bool {
+pub fn tag_name_equals(tag_name: &str) -> impl FnMut(&roxmltree::Node<'_, '_>) -> bool {
     move |node| node.tag_name().name() == tag_name
 }
 
-fn rewrite(html: &str) -> String {
-    use lol_html::html_content::{ContentType, Element};
-    use lol_html::{RewriteStrSettings, element};
-
-    let settings = RewriteStrSettings {
-        element_content_handlers: vec![element!("*", |el: &mut Element| {
-            // Insert the paragraph symbol before the ending </p> tag
-            if el.tag_name() == "p" {
-                // <p> tags can have content, so it has end_tag_handlers
-                let handlers = el.end_tag_handlers().unwrap();
-                handlers.push(Box::new(|end| {
-                    end.before(" ¶", ContentType::Text);
-                    Ok(())
-                }));
-            }
-
-            // We just want the text content of the elements, so this
-            // function is perfect!
-            el.remove_and_keep_content();
-            Ok(())
-        })],
-        ..RewriteStrSettings::new()
-    };
-
-    lol_html::rewrite_str(html, settings).unwrap()
-}
+// fn rewrite(html: &str) -> String {
+//     use lol_html::html_content::{ContentType, Element};
+//     use lol_html::{RewriteStrSettings, element};
+// 
+//     let settings = RewriteStrSettings {
+//         element_content_handlers: vec![element!("*", |el: &mut Element| {
+//             // Insert the paragraph symbol before the ending </p> tag
+//             if el.tag_name() == "p" {
+//                 // <p> tags can have content, so it has end_tag_handlers
+//                 let handlers = el.end_tag_handlers().unwrap();
+//                 handlers.push(Box::new(|end| {
+//                     end.before(" ¶", ContentType::Text);
+//                     Ok(())
+//                 }));
+//             }
+// 
+//             // We just want the text content of the elements, so this
+//             // function is perfect!
+//             el.remove_and_keep_content();
+//             Ok(())
+//         })],
+//         ..RewriteStrSettings::new()
+//     };
+// 
+//     lol_html::rewrite_str(html, settings).unwrap()
+// }
 
 #[cfg(test)]
 mod tests {

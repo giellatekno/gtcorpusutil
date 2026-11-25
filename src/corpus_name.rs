@@ -205,7 +205,7 @@ impl CorpusName {
             .next()
             .expect("split() always has at least 1 item, even if input string is empty");
 
-        if lang.len() == 0 {
+        if lang.is_empty() {
             return Err(NotCorpusNameError::MissingLang);
         }
 

@@ -2,7 +2,8 @@ use std::path::PathBuf;
 
 use crate::AnalysedFilePath;
 use crate::KorpMono;
-use crate::Module;
+use crate::Category;
+use crate::NotCategoryError;
 
 /// The path to a korp mono xml file.
 pub struct KorpMonoFilePath {
@@ -24,7 +25,24 @@ impl KorpMonoFilePath {
     /// Read the file contents into a new [String]. Equivalent to
     /// `std::fs::read_to_string(&self.to_path_buf())`.
     pub fn read_to_string(&self) -> std::io::Result<String> {
-        std::fs::read_to_string(&self.to_path_buf())
+        std::fs::read_to_string(self.to_path_buf())
+    }
+
+    /// Get the category of this file. If this file resides in a directory that is
+    /// not a known category, [NotCategoryError] will be returned.
+    pub fn category(&self) -> Result<Category, NotCategoryError> {
+        let mut components = self.file.components();
+        let c = components.next().expect("path is not empty");
+        let s = c.as_os_str().to_str().expect("file paths are valid utf-8");
+        match Category::from_path_str(s) {
+            Ok(category) => Ok(category),
+            Err(NotCategoryError::Hist) => {
+                let c = components.next().unwrap();
+                let s = c.as_os_str().to_str().expect("file paths are valid utf-8");
+                Category::from_path_str(s)
+            }
+            Err(other) => Err(other),
+        }
     }
 }
 

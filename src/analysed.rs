@@ -7,7 +7,6 @@ use crate::utils::is_corpusdir_name;
 use crate::AnalysedFilePath;
 use crate::Corpus;
 use crate::KorpMono;
-use crate::Module;
 
 /// The `analysed/` subdirectory of a corpus directory. Used primarily for
 /// its `files()` method to iterate over all analysed xml files.
@@ -48,10 +47,10 @@ impl Analysed {
     /// An iterator over all the xml files in this `analysed` directory.
     pub fn files(&self) -> impl Iterator<Item = AnalysedFilePath> {
         let p = self.to_path_buf();
-        crate::find_xml_files(self.to_path_buf()).filter_map(move |entry| {
+        crate::find_xml_files(self.to_path_buf()).map(move |entry| {
             let file = entry.path().strip_prefix(&p)
                 .expect("absolute path of entry is a subpath of input path");
-            Some(self.with_file(file))
+            self.with_file(file)
         })
     }
 }

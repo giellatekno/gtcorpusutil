@@ -14,7 +14,7 @@ pub fn path_make_absolute_and_canonicalize<P: AsRef<Path>>(
         path.to_path_buf()
     };
 
-    Ok(p.canonicalize()?)
+    p.canonicalize()
 }
 
 /// Error returned when trying to find the root directory
@@ -76,8 +76,8 @@ pub fn is_corpusdir_name(component: &std::path::Component) -> bool {
     let bytes = component.as_os_str().as_encoded_bytes();
 
     bytes.len() >= 10
-        && bytes[..7] == [b'c', b'o', b'r', b'p', b'u', b's', b'-']
-        && bytes[7..10].iter().all(|c| matches!(c, b'a'..=b'z'))
+        && bytes[..7] == *b"corpus-"
+        && bytes[7..10].iter().all(|c: &u8| c.is_ascii_lowercase())
 }
 
 #[cfg(test)]

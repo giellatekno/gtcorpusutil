@@ -23,9 +23,7 @@ pub fn remove_ats(s: &str) -> Option<Cow<'_, str>> {
     };
 
     // find ending @, or return None if not found to indicate invalid string
-    let Some(mut c) = indices.next() else {
-        return None;
-    };
+    let mut c = indices.next()?;
 
     let mut out = String::new();
     loop {
@@ -44,9 +42,7 @@ pub fn remove_ats(s: &str) -> Option<Cow<'_, str>> {
         b = next_b;
 
         // find next ending @, or return None to indicate invalid string if not found
-        let Some(next_c) = indices.next() else {
-            return None;
-        };
+        let next_c = indices.next()?;
         c = next_c;
     }
 }
@@ -107,9 +103,7 @@ where
     type Item = (T, T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        let Some(a) = self.0.next() else {
-            return None;
-        };
+        let a = self.0.next()?;
 
         let Some(b) = self.0.next() else {
             panic!("expecting iterator to always produce 2 items when asking for next chunk");
@@ -120,6 +114,7 @@ where
 }
 
 #[allow(dead_code)]
+#[allow(clippy::let_and_return)]  // clippy doesn't like "let x = 1; x" at the end
 pub fn alternative_implementation(s: &str) -> String {
     let indices = std::iter::once(-1isize)
         .chain(memchr::memchr_iter(b'@', s.as_bytes()).map(|i| i as isize))

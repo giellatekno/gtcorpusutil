@@ -45,10 +45,10 @@ impl Converted {
         // anders: sad. has to allocate 2 paths, one to give the root to find_xml_files(),
         // and once to strip that prefix, to retrieve the module and inner file path.
         let converted_path = self.to_path_buf();
-        crate::find_xml_files(self.to_path_buf()).filter_map(move |entry| {
+        crate::find_xml_files(self.to_path_buf()).map(move |entry| {
             let file = entry.path().strip_prefix(&converted_path)
                 .expect("absolute paths from walkdir are subpaths of the input path");
-            Some(self.with_file(file))
+            self.with_file(file)
         })
     }
 

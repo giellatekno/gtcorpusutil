@@ -3,6 +3,8 @@ use std::path::PathBuf;
 use crate::Analysed;
 use crate::Corpus;
 use crate::CorpusName;
+use crate::Category;
+use crate::NotCategoryError;
 
 /// Represents the path to an analysed document, that is, a specific xml file.
 /// Think of it as storing e.g.
@@ -34,16 +36,34 @@ impl AnalysedFilePath {
 
     /// Does this file exist? Equivalent to `std::fs::exists(&self.to_path_buf())`.
     pub fn exists(&self) -> bool {
-        std::fs::exists(&self.to_path_buf()).unwrap_or(false)
+        std::fs::exists(self.to_path_buf()).unwrap_or(false)
     }
 
     /// Read the contents of this file.
     pub fn read_to_string(&self) -> Result<String, std::io::Error> {
-        std::fs::read_to_string(&self.to_path_buf())
+        std::fs::read_to_string(self.to_path_buf())
+    }
+
+    /// Get the category of this file.
+    pub fn category(&self) -> Result<Category, NotCategoryError> {
+        let mut components = self.file.components();
+        let c = components.next().expect("path is not empty");
+        let s = c.as_os_str().to_str().expect("file paths are valid utf-8");
+        match Category::from_path_str(s) {
+            Ok(category) => Ok(category),
+            Err(NotCategoryError::Hist) => {
+                let c = components.next().unwrap();
+                let s = c.as_os_str().to_str().expect("file paths are valid utf-8");
+                Category::from_path_str(s)
+            }
+            Err(other) => Err(other),
+        }
     }
 }
 
 #[derive(Debug, thiserror::Error)]
+// Clippy doesn't like all variant names starting with the same prefix ("Missing")
+#[allow(clippy::enum_variant_names)]
 pub enum AnalysedFilePathBuildError {
     #[error("missing root")]
     MissingRoot,

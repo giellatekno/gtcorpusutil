@@ -76,8 +76,8 @@ mod converted_document;
 mod converted_file_path;
 mod corpus;
 mod corpus_name;
-mod corpus_stage;
 mod korp_mono;
+pub mod korp_mono_document;
 mod korp_mono_file_path;
 mod module;
 mod parse_year;
@@ -90,10 +90,14 @@ use std::path::{Path, PathBuf};
 // public exports
 pub use crate::analysed::{Analysed};
 pub use crate::analysed_file_path::AnalysedFilePath;
+pub use crate::analysed_document::AnalysedDocument;
+pub use crate::analysed_document::NewAnalysedDocumentError;
 pub use crate::category::{Category, NotCategoryError};
 pub use crate::converted::Converted;
 pub use crate::converted_document::ConvertedDocument;
 pub use crate::converted_file_path::ConvertedFilePath;
+pub use crate::korp_mono_document::KorpMonoDocument;
+pub use crate::korp_mono_document::NewKorpMonoDocumentError;
 pub use crate::corpus::Corpus;
 pub use crate::corpus::CorpusBuilder;
 pub use crate::corpus_name::CorpusName;
@@ -111,7 +115,7 @@ pub use crate::root::Root;
 /// Returns a [`str`] with the prefix and suffix of `substr` removed, or
 /// `None` if the string doesn't both start and end with `substr`.
 pub fn strip<'a>(string: &'a str, substr: &str) -> Option<&'a str> {
-    Some(string.strip_prefix(substr)?.strip_suffix(substr)?)
+    string.strip_prefix(substr)?.strip_suffix(substr)
 }
 
 /// Recursively iterate the directory given by `path`, and yield
@@ -119,7 +123,7 @@ pub fn strip<'a>(string: &'a str, substr: &str) -> Option<&'a str> {
 pub fn find_xml_files<P: AsRef<std::path::Path>>(path: P) -> impl Iterator<Item = walkdir::DirEntry> {
     walkdir::WalkDir::new(path)
         .into_iter()
-        .flat_map(move |maybe_entry| maybe_entry)
+        .flatten() // ignore errors
         .filter(move |entry| entry.file_type().is_file())
         .filter(move |entry| {
             entry

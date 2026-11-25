@@ -87,7 +87,8 @@ impl CorpusBuilder {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, thiserror::Error)]
+#[error("Not a corpus path")]
 pub struct NotCorpusPathError;
 
 impl TryFrom<PathBuf> for Corpus {
