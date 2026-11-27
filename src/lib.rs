@@ -83,6 +83,7 @@ mod module;
 mod parse_year;
 mod remove_ats;
 mod root;
+pub mod text;
 pub mod utils;
 
 use std::path::{Path, PathBuf};
@@ -111,6 +112,7 @@ pub use crate::module::Module;
 pub use crate::parse_year::parse_year;
 pub use crate::remove_ats::remove_ats;
 pub use crate::root::Root;
+pub use crate::text::Paragraph;
 
 /// Returns a [`str`] with the prefix and suffix of `substr` removed, or
 /// `None` if the string doesn't both start and end with `substr`.

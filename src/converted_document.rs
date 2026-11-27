@@ -66,8 +66,14 @@ impl<'a> ConvertedDocument<'a> {
             .find(|node| node.tag_name().name() == "body")
     }
 
-    /// Return the contents of the `<body>` tag of the converted document,
-    /// stripped of html tags, as text. This is essentially what `ccat` does.
+    /// The paragraphs in language `lang`: the text that analysis works on
+    /// (what `ccat` gives `analyse_corpus`). See [`crate::text`].
+    pub fn paragraphs(&self, lang: &str) -> Vec<crate::text::Paragraph> {
+        crate::text::paragraphs(&self.0, lang)
+    }
+
+    /// The first text node of `<body>`, which is usually just whitespace.
+    /// For the text of the document, use [`Self::paragraphs`].
     pub fn body_text(&self) -> Option<&str> {
         self.body().and_then(|node| node.text())
     }
@@ -108,6 +114,17 @@ impl<'a> ConvertedDocument<'a> {
 
     fn root(&'_ self) -> roxmltree::Node<'a, '_> {
         self.0.root_element()
+    }
+
+    /// The `<header>` element. Its `range()` is where it is in the source
+    /// text, to copy it verbatim.
+    pub fn header(&self) -> Option<roxmltree::Node<'a, '_>> {
+        self.root().children().find(tag_name_equals("header"))
+    }
+
+    /// The `xml:lang` of `<document>`: the document's main language.
+    pub fn lang(&self) -> Option<&str> {
+        self.root().attribute((roxmltree::NS_XML_URI, "lang"))
     }
 
     fn header_descendants(&self) -> Option<roxmltree::Descendants<'_, '_>> {
@@ -255,37 +272,17 @@ mod tests {
             Err(e) => panic!("{e}"),
         };
 
-        let expected = r#"<p type="title">Bearaš</p>
-<p>Dáppe leat dieđut vuoigatvuođaid ja geatnegasvuođaid birra bearraša hárrái.</p>
-<p xml:lang="nob">Váhnenruhta riegádeami oktavuođas (Foreldrepenger ved fødsel)</p>
-<p>Váhnenruhta adopšuvnna oktavuođas (Foreldrepenger ved adopsjon)</p>
-<p xml:lang="nob">Váhnenruhta áhččái riegádahttimis ja adopšuvnnas (Foreldrepenger til far ved fødsel og adopsjon)</p>
-<p xml:lang="nob">Áhččivuohta ja váhnenovddasvástádus (Farskap og foreldreansvar)</p>
-<p>Mánnáoadju (Barnetrygd)</p>
-<p>Reaidadoarjja unnamánášváhnemiidda (Kontantstøtte)</p>
-<p>Máksu ovdagihtii (Bidragsforskudd)</p>
-<p>Nuppástusdoarjja (Overgangsstønad)</p>
-<p>Mánáidgeahččama doarjja (Barnetilsyn)</p>
-<p>Oahppodoarjja (Utdanningsstønad)</p>
-<p xml:lang="nob">Fárrendoarjja (Tilskudd til flytting)</p>
-<p xml:lang="nob">Doarjja ovttaskas eadnái/áhččái (Stønad til enslig mor/far)</p>
-"#;
-        //        let expected = r#"Bearaš
-        //Dáppe leat dieđut vuoigatvuođaid ja geatnegasvuođaid birra bearraša hárrái.
-        //Váhnenruhta riegádeami oktavuođas (Foreldrepenger ved fødsel)
-        //Váhnenruhta adopšuvnna oktavuođas (Foreldrepenger ved adopsjon)
-        //Váhnenruhta áhččái riegádahttimis ja adopšuvnnas (Foreldrepenger til far ved fødsel og adopsjon)
-        //Áhččivuohta ja váhnenovddasvástádus (Farskap og foreldreansvar)
-        //Mánnáoadju (Barnetrygd)
-        //Reaidadoarjja unnamánášváhnemiidda (Kontantstøtte)
-        //Máksu ovdagihtii (Bidragsforskudd)
-        //Nuppástusdoarjja (Overgangsstønad)
-        //Mánáidgeahččama doarjja (Barnetilsyn)
-        //Oahppodoarjja (Utdanningsstønad)
-        //Fárrendoarjja (Tilskudd til flytting)
-        //Doarjja ovttaskas eadnái/áhččái (Stønad til enslig mor/far)
-        //"#;
-        let actual = doc.body_text().expect("document has a <body>");
+        let expected = "Bearaš ¶
+Dáppe leat dieđut vuoigatvuođaid ja geatnegasvuođaid birra bearraša hárrái. ¶
+Váhnenruhta adopšuvnna oktavuođas (Foreldrepenger ved adopsjon) ¶
+Mánnáoadju (Barnetrygd) ¶
+Reaidadoarjja unnamánášváhnemiidda (Kontantstøtte) ¶
+Máksu ovdagihtii (Bidragsforskudd) ¶
+Nuppástusdoarjja (Overgangsstønad) ¶
+Mánáidgeahččama doarjja (Barnetilsyn) ¶
+Oahppodoarjja (Utdanningsstønad) ¶
+";
+        let actual = crate::text::ccat_format(&doc.paragraphs("sme"));
 
         println!(
             "expected has length = {}, actual has length = {}",
